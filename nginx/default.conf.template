@@ -5,13 +5,14 @@ server {
     return 301 https://$host$request_uri;
 }
 
-# Domains should be passed as VAULT_DOMAINS env var (space or comma separated)
-# Example: VAULT_DOMAINS="vault.yourdomain.com vault.someotherdomain.net"
+# Vaultwarden - Primary domain and optional redirects
+# Primary: VAULT_SUBDOMAIN.PRIMARY_DOMAIN (e.g., vault.yourdomain.com)
+# Redirects: VAULT_SUBDOMAINS (optional, space or comma separated)
 server {
     listen 443 ssl;
-    server_name ${VAULT_DOMAINS};
+    server_name ${VAULT_SUBDOMAIN}.${PRIMARY_DOMAIN} ${VAULT_SUBDOMAINS};
 
-    # SSL certificates - adjust domain name as needed
+    # SSL certificates
     ssl_certificate /etc/letsencrypt/live/${PRIMARY_DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${PRIMARY_DOMAIN}/privkey.pem;
 
@@ -31,13 +32,14 @@ server {
     }
 }
 
-# Domains should be passed as PROXY_DOMAINS env var (space or comma separated)
-# Example: PROXY_DOMAINS="proxy.yourdomain.com proxy.someotherdomain.net"
+# S-UI Proxy - Primary domain and optional redirects
+# Primary: PROXY_SUBDOMAIN.PRIMARY_DOMAIN (e.g., proxy.yourdomain.com)
+# Redirects: PROXY_SUBDOMAINS (optional, space or comma separated)
 server {
     listen 443 ssl;
-    server_name ${PROXY_DOMAINS};
+    server_name ${PROXY_SUBDOMAIN}.${PRIMARY_DOMAIN} ${PROXY_SUBDOMAINS};
 
-    # SSL certificates - adjust domain name as needed
+    # SSL certificates
     ssl_certificate /etc/letsencrypt/live/${PRIMARY_DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${PRIMARY_DOMAIN}/privkey.pem;
 

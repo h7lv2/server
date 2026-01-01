@@ -11,14 +11,16 @@ services:
       - ./cert:/etc/letsencrypt:ro
     environment:
       - PRIMARY_DOMAIN=${PRIMARY_DOMAIN}
-      - VAULT_DOMAINS=${VAULT_DOMAINS}
-      - PROXY_DOMAINS=${PROXY_DOMAINS}
+      - VAULT_SUBDOMAIN=${VAULT_SUBDOMAIN}
+      - VAULT_SUBDOMAINS=${VAULT_SUBDOMAINS}
+      - PROXY_SUBDOMAIN=${PROXY_SUBDOMAIN}
+      - PROXY_SUBDOMAINS=${PROXY_SUBDOMAINS}
     depends_on:
       - s-ui
       - vaultwarden
     networks: [backend]
     entrypoint: >
-      sh -c "envsubst '$$PRIMARY_DOMAIN,$$VAULT_DOMAINS,$$PROXY_DOMAINS'
+      sh -c "envsubst '$$PRIMARY_DOMAIN,$$VAULT_SUBDOMAIN,$$VAULT_SUBDOMAINS,$$PROXY_SUBDOMAIN,$$PROXY_SUBDOMAINS'
       < /etc/nginx/conf.d/default.conf.template
       > /etc/nginx/conf.d/default.conf &&
       nginx -g 'daemon off;'"
@@ -41,7 +43,7 @@ services:
     restart: unless-stopped
     environment:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/vaultwarden
-      - DOMAIN=https://${VAULT_SUBDOMAIN}.${DOMAIN_1}
+      - DOMAIN=https://${VAULT_SUBDOMAIN}.${PRIMARY_DOMAIN}
     volumes:
       - ./vw-data:/data
     depends_on:

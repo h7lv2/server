@@ -75,7 +75,7 @@ services:
     networks: [backend]
 
   certbot:
-    image: infinityofspace/certbot_dns_porkbun
+    image: certbot/dns-cloudflare
     container_name: certbot
     env_file: .env
     volumes:

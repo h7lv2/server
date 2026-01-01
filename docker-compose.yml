@@ -20,7 +20,12 @@ services:
       - vaultwarden
     networks: [backend]
     entrypoint: >
-      sh -c "envsubst '$$PRIMARY_DOMAIN,$$VAULT_SUBDOMAIN,$$VAULT_SUBDOMAINS,$$PROXY_SUBDOMAIN,$$PROXY_SUBDOMAINS'
+      sh -c "
+      while [ ! -f /etc/letsencrypt/live/$$PRIMARY_DOMAIN/fullchain.pem ]; do
+        echo 'Waiting for SSL certificates...';
+        sleep 5;
+      done;
+      envsubst '$$PRIMARY_DOMAIN,$$VAULT_SUBDOMAIN,$$VAULT_SUBDOMAINS,$$PROXY_SUBDOMAIN,$$PROXY_SUBDOMAINS'
       < /etc/nginx/conf.d/default.conf.template
       > /etc/nginx/conf.d/default.conf &&
       nginx -g 'daemon off;'"

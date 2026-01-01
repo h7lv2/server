@@ -1,0 +1,78 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+      - ./cert:/etc/letsencrypt:ro
+    depends_on:
+      - s-ui
+      - vaultwarden
+    networks: [backend]
+
+  s-ui:
+    image: alireza7/s-ui
+    container_name: s-ui
+    restart: unless-stopped
+    ports:
+      - "10000-10010:10000-10010"
+      - "10000-10010:10000-10010/udp"
+    volumes:
+      - "./db_sui:/app/db"
+      - "./cert:/app/cert:ro"
+    networks: [backend]
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/vaultwarden
+      - DOMAIN=https://${VAULT_SUBDOMAIN}.${DOMAIN_1}
+    volumes:
+      - ./vw-data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [backend]
+
+  db:
+    image: postgres:15-alpine
+    container_name: shared_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_MULTIPLE_DATABASES=${POSTGRES_MULTIPLE_DATABASES}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./postgres/init-db.sh:/usr/local/bin/init-db.sh:ro
+    command: >
+      sh -c "docker-entrypoint.sh postgres &
+             until pg_isready -U $$POSTGRES_USER; do sleep 2; done;
+             /usr/local/bin/init-db.sh;
+             wait"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [backend]
+
+  certbot:
+    image: infinityofspace/certbot_dns_porkbun
+    container_name: certbot
+    env_file: .env
+    volumes:
+      - ./cert:/etc/letsencrypt
+      - ./certbot-entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    networks: [backend]
+
+networks:
+  backend:
+    driver: bridge

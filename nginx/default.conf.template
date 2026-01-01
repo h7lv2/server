@@ -1,0 +1,56 @@
+# HTTP to HTTPS redirect for all domains
+server {
+    listen 80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+
+# Domains should be passed as VAULT_DOMAINS env var (space or comma separated)
+# Example: VAULT_DOMAINS="vault.yourdomain.com vault.someotherdomain.net"
+server {
+    listen 443 ssl;
+    server_name ${VAULT_DOMAINS};
+
+    # SSL certificates - adjust domain name as needed
+    ssl_certificate /etc/letsencrypt/live/${PRIMARY_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${PRIMARY_DOMAIN}/privkey.pem;
+
+    # Modern TLS configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    client_max_body_size 128M;
+
+    location / {
+        proxy_pass http://vaultwarden:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Domains should be passed as PROXY_DOMAINS env var (space or comma separated)
+# Example: PROXY_DOMAINS="proxy.yourdomain.com proxy.someotherdomain.net"
+server {
+    listen 443 ssl;
+    server_name ${PROXY_DOMAINS};
+
+    # SSL certificates - adjust domain name as needed
+    ssl_certificate /etc/letsencrypt/live/${PRIMARY_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${PRIMARY_DOMAIN}/privkey.pem;
+
+    # Modern TLS configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    location / {
+        proxy_pass http://s-ui:2095;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

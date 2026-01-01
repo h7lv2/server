@@ -9,10 +9,19 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d:ro
       - ./cert:/etc/letsencrypt:ro
+    environment:
+      - PRIMARY_DOMAIN=${PRIMARY_DOMAIN}
+      - VAULT_DOMAINS=${VAULT_DOMAINS}
+      - PROXY_DOMAINS=${PROXY_DOMAINS}
     depends_on:
       - s-ui
       - vaultwarden
     networks: [backend]
+    entrypoint: >
+      sh -c "envsubst '$$PRIMARY_DOMAIN,$$VAULT_DOMAINS,$$PROXY_DOMAINS'
+      < /etc/nginx/conf.d/default.conf.template
+      > /etc/nginx/conf.d/default.conf &&
+      nginx -g 'daemon off;'"
 
   s-ui:
     image: alireza7/s-ui

@@ -1,14 +1,12 @@
 services:
   nginx:
-    image: nginx:mainline-alpine
+    image: nginx:alpine
     container_name: nginx
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp"
       - "2096:2096"
-      - "2096:2096/udp"
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - ./cert:/etc/letsencrypt:ro

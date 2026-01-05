@@ -6,6 +6,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "2096:2096"
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - ./cert:/etc/letsencrypt:ro
@@ -35,7 +36,6 @@ services:
     container_name: s-ui
     restart: unless-stopped
     ports:
-      - "2096:2096"
       - "10000-10010:10000-10010"
       - "10000-10010:10000-10010/udp"
     volumes:

@@ -5,11 +5,39 @@ server {
     return 301 https://$host$request_uri;
 }
 
+# HTTPS with QUIC support for standard ports
+server {
+    listen 443 ssl http2;
+    listen 443 quic reuseport;
+    server_name _;
+
+    # SSL certificates
+    ssl_certificate /etc/letsencrypt/live/${PRIMARY_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${PRIMARY_DOMAIN}/privkey.pem;
+
+    # Modern TLS configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # QUIC settings
+    add_header Alt-Svc 'h3=":443"; ma=86400' always;
+    ssl_early_data on;
+}
+
+# S-UI API HTTP to HTTPS redirect on port 2096
+server {
+    listen 2096;
+    server_name _;
+    return 301 https://$host:2096$request_uri;
+}
+
 # Vaultwarden - Primary domain and optional redirects
 # Primary: VAULT_SUBDOMAIN.PRIMARY_DOMAIN (e.g., vault.yourdomain.com)
 # Redirects: VAULT_SUBDOMAINS (optional, space or comma separated)
 server {
-    listen 443 ssl;
+    listen 443 ssl http2;
+    listen 443 quic;
     server_name ${VAULT_SUBDOMAIN}.${PRIMARY_DOMAIN} ${VAULT_SUBDOMAINS};
 
     # SSL certificates
@@ -20,6 +48,10 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
+
+    # QUIC settings
+    add_header Alt-Svc 'h3=":443"; ma=86400' always;
+    ssl_early_data on;
 
     client_max_body_size 128M;
 
@@ -36,7 +68,8 @@ server {
 # Primary: PROXY_SUBDOMAIN.PRIMARY_DOMAIN (e.g., proxy.yourdomain.com)
 # Redirects: PROXY_SUBDOMAINS (optional, space or comma separated)
 server {
-    listen 443 ssl;
+    listen 443 ssl http2;
+    listen 443 quic;
     server_name ${PROXY_SUBDOMAIN}.${PRIMARY_DOMAIN} ${PROXY_SUBDOMAINS};
 
     # SSL certificates
@@ -47,6 +80,10 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
+
+    # QUIC settings
+    add_header Alt-Svc 'h3=":443"; ma=86400' always;
+    ssl_early_data on;
 
     location / {
         proxy_pass http://s-ui:2095;
@@ -59,7 +96,8 @@ server {
 
 # S-UI API - Direct port mapping
 server {
-    listen 2096 ssl;
+    listen 2096 ssl http2;
+    listen 2096 quic;
     server_name _;
 
     # SSL certificates
@@ -70,6 +108,10 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
+
+    # QUIC settings
+    add_header Alt-Svc 'h3=":2096"; ma=86400' always;
+    ssl_early_data on;
 
     location / {
         proxy_pass http://s-ui:2096;

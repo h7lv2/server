@@ -7,6 +7,7 @@ services:
       - "80:80"
       - "443:443"
       - "2096:2096"
+      - "2097:2097"
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - ./cert:/etc/letsencrypt:ro

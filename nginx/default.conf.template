@@ -68,6 +68,13 @@ server {
 }
 
 # S-UI API - Direct port mapping
+# Redirect accidental HTTP requests on 2096 to HTTPS on 2096
+server {
+    listen 2096;
+    server_name _;
+    return 301 https://$host:2096$request_uri;
+}
+
 server {
     listen 2096 ssl;
     server_name _;

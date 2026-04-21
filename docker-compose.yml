@@ -58,6 +58,21 @@ services:
         condition: service_healthy
     networks: [backend]
 
+  shrimpnet:
+    image: iceshrimp.dev/iceshrimp/shrimpnet:dev
+    container_name: shrimpnet
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - ICESHRIMP_CONFIG_OVERRIDES=/app/config/configuration.ini
+    networks: [backend]
+    volumes:
+      - ./shrimpnet/data/media:/data/media
+      - ./shrimpnet/config:/app/config:ro
+
   db:
     image: postgres:15-alpine
     container_name: shared_db

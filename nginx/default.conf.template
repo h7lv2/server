@@ -35,7 +35,7 @@ server {
 # Shrimpnet - Primary domain
 server {
     listen 443 ssl;
-    server_name ${PRIMARY_DOMAIN};
+    server_name ${PRIMARY_DOMAIN} shrimps.halvacoffee.fyi;
 
     # SSL certificates
     ssl_certificate /etc/letsencrypt/live/${PRIMARY_DOMAIN}/fullchain.pem;

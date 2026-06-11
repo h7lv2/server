@@ -1,0 +1,46 @@
+api:
+  dashboard: true
+  debug: false
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+  # L4 entrypoints for TCP routing
+  s-ui-api:
+    address: ":2097"
+  s-ui-api-redirect:
+    address: ":2096"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: backend
+    watch: true
+
+certificatesResolvers:
+  cloudflare:
+    acme:
+      email: ${EMAIL}
+      storage: /etc/traefik/acme/acme.json
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - "1.1.1.1:53"
+          - "1.0.0.1:53"
+        delayBeforeCheck: 10
+
+log:
+  level: INFO
+  format: json
+
+accessLog:
+  format: json

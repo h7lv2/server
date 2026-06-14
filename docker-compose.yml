@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.1
+    image: traefik:v3.7.5
     container_name: traefik
     restart: unless-stopped
     ports:
@@ -14,6 +14,8 @@ services:
       - ./traefik/acme:/etc/traefik/acme
     environment:
       - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+      - EMAIL=${EMAIL}
+      - TRAEFIK_CERTIFICATESRESOLVERS_CLOUDFLARE_ACME_EMAIL=${EMAIL}
     networks: [backend]
 
   s-ui:
@@ -66,7 +68,7 @@ services:
       - traefik.http.services.vaultwarden.loadbalancer.server.port=80
 
   shrimpnet:
-    image: iceshrimp.dev/iceshrimp/shrimpnet:dev
+    image: iceshrimp.dev/iceshrimp/iceshrimp.net:dev
     container_name: shrimpnet
     restart: unless-stopped
     depends_on:
@@ -110,4 +112,5 @@ services:
 
 networks:
   backend:
+    name: backend
     driver: bridge

@@ -1,0 +1,778 @@
+[server]
+# Public hostname of the PDS, such as `pds.example.com`.
+#
+# Can also be specified via environment variable `PDS_HOSTNAME`.
+#
+# Required! This value must be specified.
+hostname = pds.halvacoffee.fyi
+
+# Address to bind the HTTP server to.
+#
+# Can also be specified via environment variable `SERVER_HOST`.
+#
+# Default value: "127.0.0.1"
+# host = "127.0.0.1"
+
+# Port to bind the HTTP server to.
+#
+# Can also be specified via environment variable `SERVER_PORT`.
+#
+# Default value: 3000
+# port = 3000
+
+# List of domains for user handles.
+# Defaults to the PDS hostname when not set.
+#
+# Can also be specified via environment variable `PDS_USER_HANDLE_DOMAINS`.
+#user_handle_domains =
+
+# Enable PDS-hosted did:web identities.  Hosting did:web requires a
+# long-term commitment to serve DID documents; opt-in only.
+#
+# Can also be specified via environment variable `ENABLE_PDS_HOSTED_DID_WEB`.
+#
+# Default value: false
+#enable_pds_hosted_did_web = false
+
+# When set to true, skip age-assurance birthday prompt for all accounts.
+#
+# Can also be specified via environment variable `PDS_AGE_ASSURANCE_OVERRIDE`.
+#
+# Default value: false
+age_assurance_override = true
+
+# Require an invite code for new account registration.
+#
+# Can also be specified via environment variable `INVITE_CODE_REQUIRED`.
+#
+# Default value: true
+#invite_code_required = true
+
+# Allow HTTP (non-TLS) proxy requests. Only useful during development.
+#
+# Can also be specified via environment variable `ALLOW_HTTP_PROXY`.
+#
+# Default value: false
+#allow_http_proxy = false
+
+# Disable all rate limiting. Should only be used in testing.
+#
+# Can also be specified via environment variable `DISABLE_RATE_LIMITING`.
+#
+# Default value: false
+#disable_rate_limiting = false
+
+# Skip the verified-comms-channel gate for login and record writes.
+# Please keep this off unless you're an invite-only PDS!
+#
+# Can also be specified via environment variable `DISABLE_ACCOUNT_VERIFICATION_GATE`.
+#
+# Default value: false
+#disable_account_verification_gate = false
+
+# List of additional banned words for handle validation.
+#
+# Can also be specified via environment variable `PDS_BANNED_WORDS`.
+#banned_words =
+
+# URL to a privacy policy page.
+#
+# Can also be specified via environment variable `PRIVACY_POLICY_URL`.
+#privacy_policy_url =
+
+# URL to terms of service page.
+#
+# Can also be specified via environment variable `TERMS_OF_SERVICE_URL`.
+#terms_of_service_url =
+
+# Operator contact email address.
+#
+# Can also be specified via environment variable `CONTACT_EMAIL`.
+contact_email = hunhow@vivaldi.net
+
+# Maximum allowed blob size in bytes (default 10 GiB).
+#
+# Can also be specified via environment variable `MAX_BLOB_SIZE`.
+#
+# Default value: 10737418240
+# max_blob_size = 10737418240
+
+# Maximum allowed number of preferences
+#
+# Can also be specified via environment variable `MAX_PREFERENCES_COUNT`.
+#
+# Default value: 1000
+#max_preferences_count = 1000
+
+# If you're not altering TLS config, you don't have to worry about this.
+# This is the number of trusted reverse proxies in front of Tranquil.
+# We read the client IP used for rate limiting and device records this many hops
+# from the right of the X-Forwarded-For header.
+# When left unset, Tranquil will assume:
+# - 0, if the TLS termination is happening here on Tranquil via the TLS config
+# - 1, if the TLS termination *isn't* happening here.
+#
+# Can also be specified via environment variable `TRUSTED_PROXY_COUNT`.
+#trusted_proxy_count =
+
+[server.tls]
+# The path to the TLS cert chain.
+# If you set both this and `key_path`, the server terminates TLS itself rather than expecting
+# a reverse proxy to do it. The certificate and key reload on SIGHUP.
+#
+# Can also be specified via environment variable `TLS_CERT_PATH`.
+#cert_path =
+
+# Path to the TLS private key.
+#
+# Can also be specified via environment variable `TLS_KEY_PATH`.
+#key_path =
+
+# Serve HTTP/3 over QUIC on the same UDP port as the TCP listener.
+# Requires cert_path and key_path.
+#
+# Can also be specified via environment variable `TLS_HTTP3`.
+#
+# Default value: false
+#http3 = false
+
+[frontend]
+# Whether to enable the built in serving of the frontend.
+#
+# Can also be specified via environment variable `FRONTEND_ENABLED`.
+#
+# Default value: true
+#enabled = true
+
+# Directory to serve as the frontend. The oauth_client_metadata.json will have any references to
+# the frontend hostname replaced by the configured frontend hostname.
+#
+# Can also be specified via environment variable `FRONTEND_DIR`.
+#
+# Default value: "/var/lib/tranquil-pds/frontend"
+#dir = "/var/lib/tranquil-pds/frontend"
+
+[database]
+# PostgreSQL connection URL.
+#
+# Can also be specified via environment variable `DATABASE_URL`.
+#
+# Required! This value must be specified.
+#url =
+
+# Maximum number of connections in the pool.
+#
+# Can also be specified via environment variable `DATABASE_MAX_CONNECTIONS`.
+#
+# Default value: 100
+#max_connections = 100
+
+# Minimum number of idle connections kept in the pool.
+#
+# Can also be specified via environment variable `DATABASE_MIN_CONNECTIONS`.
+#
+# Default value: 10
+#min_connections = 10
+
+# Timeout in seconds when acquiring a connection from the pool.
+#
+# Can also be specified via environment variable `DATABASE_ACQUIRE_TIMEOUT_SECS`.
+#
+# Default value: 10
+#acquire_timeout_secs = 10
+
+[secrets]
+# Secret used for signing JWTs. Must be at least 32 characters in
+# production.
+#
+# Can also be specified via environment variable `JWT_SECRET`.
+#jwt_secret =
+
+# Secret used for DPoP proof validation. Must be at least 32 characters
+# in production.
+#
+# Can also be specified via environment variable `DPOP_SECRET`.
+#dpop_secret =
+
+# Master key used for key-encryption and HKDF derivation. Must be at
+# least 32 characters in production.
+#
+# Can also be specified via environment variable `MASTER_KEY`.
+#master_key =
+
+# PLC rotation key (DID key). If not set, user-level keys are used.
+#
+# Can also be specified via environment variable `PLC_ROTATION_KEY`.
+#plc_rotation_key =
+
+# Allow insecure/test secrets. NEVER enable in production.
+#
+# Can also be specified via environment variable `TRANQUIL_PDS_ALLOW_INSECURE_SECRETS`.
+#
+# Default value: false
+#allow_insecure = false
+
+[storage]
+# Storage backend: `filesystem` or `s3`.
+#
+# Can also be specified via environment variable `BLOB_STORAGE_BACKEND`.
+#
+# Default value: "filesystem"
+#backend = "filesystem"
+
+# Path on disk for the filesystem blob backend.
+#
+# Can also be specified via environment variable `BLOB_STORAGE_PATH`.
+#
+# Default value: "/var/lib/tranquil-pds/blobs"
+#path = "/var/lib/tranquil-pds/blobs"
+
+# S3 bucket name for blob storage.
+#
+# Can also be specified via environment variable `S3_BUCKET`.
+#s3_bucket =
+
+# Custom S3 endpoint URL.
+#
+# Can also be specified via environment variable `S3_ENDPOINT`.
+#s3_endpoint =
+
+# Repository backend: `postgres` by default, or `tranquil-store`, our embedded db.
+# tranquil-store is EXPERIMENTAL!!!! RISK OF TOTAL DATA LOSS.
+#
+# Can also be specified via environment variable `REPO_BACKEND`.
+#
+# Default value: "postgres"
+#repo_backend = "postgres"
+
+[tranquil_store]
+# Directory for tranquil-store data: the metastore, eventlog, and blockstore.
+#
+# Can also be specified via environment variable `TRANQUIL_STORE_DATA_DIR`.
+#
+# Default value: "/var/lib/tranquil-pds/store"
+#data_dir = "/var/lib/tranquil-pds/store"
+
+# Fjall block cache size in megabytes. Defaults to 20% of system RAM when unset.
+#
+# Can also be specified via environment variable `TRANQUIL_STORE_MEMORY_BUDGET_MB`.
+#memory_budget_mb =
+
+# Number of handler threads. Defaults to available_parallelism / 2.
+#
+# Can also be specified via environment variable `TRANQUIL_STORE_HANDLER_THREADS`.
+#handler_threads =
+
+# Maximum total bytes of pending (unsynced) eventlog payloads. Appenders block
+# once this budget is exhausted until in-flight events drain via fsync. Set to
+# 0 to disable backpressure. Default: 1 GiB.
+#
+# Can also be specified via environment variable `TRANQUIL_STORE_EVENTLOG_PENDING_BYTES_BUDGET`.
+#
+# Default value: 1073741824
+#eventlog_pending_bytes_budget = 1073741824
+
+# Maximum size of an individual eventlog payload in bytes. Single events
+# larger than this are rejected at append time. Default: 256 MiB.
+#
+# Can also be specified via environment variable `TRANQUIL_STORE_EVENTLOG_MAX_EVENT_PAYLOAD`.
+#
+# Default value: 268435456
+#eventlog_max_event_payload = 268435456
+
+# Maximum size of an individual blockstore data file in bytes. When the
+# active data file reaches this size it is rolled over and becomes
+# eligible for compaction. Default: 256 MiB.
+#
+# Can also be specified via environment variable `TRANQUIL_STORE_MAX_BLOCKSTORE_FILE_SIZE`.
+#
+# Default value: 268435456
+#max_blockstore_file_size = 268435456
+
+# Maximum size of an individual eventlog segment file in bytes. When the
+# active segment reaches this size it is sealed and a new one is created.
+# Safe to change on a running instance. Default: 256 MiB.
+#
+# Can also be specified via environment variable `TRANQUIL_STORE_MAX_EVENTLOG_SEGMENT_SIZE`.
+#
+# Default value: 268435456
+#max_eventlog_segment_size = 268435456
+
+[cache]
+# Cache backend: `ripple` by default, or `valkey`.
+#
+# Can also be specified via environment variable `CACHE_BACKEND`.
+#
+# Default value: "ripple"
+#backend = "ripple"
+
+# Valkey / Redis connection URL.  Required when `backend = "valkey"`.
+#
+# Can also be specified via environment variable `VALKEY_URL`.
+#valkey_url =
+
+[cache.ripple]
+# Address to bind the Ripple gossip protocol listener. With the default
+# value and no cluster_key or peers configured, the listener binds
+# loopback instead and runs as a single node.
+#
+# Can also be specified via environment variable `RIPPLE_BIND`.
+#
+# Default value: "0.0.0.0:0"
+#bind_addr = "0.0.0.0:0"
+
+# List of seed peer addresses.
+#
+# Can also be specified via environment variable `RIPPLE_PEERS`.
+#peers =
+
+# Unique machine identifier. Auto-derived from hostname when not set.
+#
+# Can also be specified via environment variable `RIPPLE_MACHINE_ID`.
+#machine_id =
+
+# Gossip protocol interval in milliseconds.
+#
+# Can also be specified via environment variable `RIPPLE_GOSSIP_INTERVAL_MS`.
+#
+# Default value: 200
+#gossip_interval_ms = 200
+
+# Maximum cache size in megabytes.
+#
+# Can also be specified via environment variable `RIPPLE_CACHE_MAX_MB`.
+#
+# Default value: 256
+#cache_max_mb = 256
+
+# Pre-shared cluster key authenticating ripple peers. Every node in the
+# cluster must set the same value. When unset, peers are unauthenticated.
+#
+# Can also be specified via environment variable `RIPPLE_CLUSTER_KEY`.
+#cluster_key =
+
+# Allow ripple to bind a non-loopback address without a cluster key.
+# Peers will be unauthenticated. Intended for trusted private networks.
+#
+# Can also be specified via environment variable `RIPPLE_ALLOW_INSECURE`.
+#
+# Default value: false
+#allow_insecure = false
+
+[plc]
+# Base URL of the PLC directory.
+#
+# Can also be specified via environment variable `PLC_DIRECTORY_URL`.
+#
+# Default value: "https://plc.directory"
+#directory_url = "https://plc.directory"
+
+# HTTP request timeout in seconds.
+#
+# Can also be specified via environment variable `PLC_TIMEOUT_SECS`.
+#
+# Default value: 10
+#timeout_secs = 10
+
+# TCP connect timeout in seconds.
+#
+# Can also be specified via environment variable `PLC_CONNECT_TIMEOUT_SECS`.
+#
+# Default value: 5
+#connect_timeout_secs = 5
+
+# Seconds to cache DID documents in memory.
+#
+# Can also be specified via environment variable `DID_CACHE_TTL_SECS`.
+#
+# Default value: 300
+#did_cache_ttl_secs = 300
+
+[firehose]
+# Size of the in-memory broadcast buffer for firehose events.
+#
+# Can also be specified via environment variable `FIREHOSE_BUFFER_SIZE`.
+#
+# Default value: 10000
+#buffer_size = 10000
+
+# How many hours of historical events to replay for cursor-based
+# firehose connections.
+#
+# Can also be specified via environment variable `FIREHOSE_BACKFILL_HOURS`.
+#
+# Default value: 72
+#backfill_hours = 72
+
+# Maximum concurrent full-repo exports, eg. getRepo without `since`.
+#
+# Can also be specified via environment variable `MAX_CONCURRENT_REPO_EXPORTS`.
+#
+# Default value: 4
+#max_concurrent_repo_exports = 4
+
+# List of relay / crawler notification URLs.
+#
+# Can also be specified via environment variable `CRAWLERS`.
+#crawlers =
+
+[email]
+# Sender email address. When unset, email sending is disabled.
+#
+# Can also be specified via environment variable `MAIL_FROM_ADDRESS`.
+#from_address =
+
+# Display name used in the `From` header.
+#
+# Can also be specified via environment variable `MAIL_FROM_NAME`.
+#
+# Default value: "Tranquil PDS"
+#from_name = "Tranquil PDS"
+
+# HELO/EHLO name announced to remote SMTP servers. Applies to both
+# smarthost and direct-MX modes. Defaults to the server hostname.
+#
+# Can also be specified via environment variable `MAIL_HELO_NAME`.
+#helo_name =
+
+[email.smarthost]
+# SMTP relay host. When set, mail is delivered through this host
+# instead of resolving recipient MX records directly.
+#
+# Can also be specified via environment variable `MAIL_SMARTHOST_HOST`.
+#host =
+
+# SMTP relay port.
+#
+# Can also be specified via environment variable `MAIL_SMARTHOST_PORT`.
+#
+# Default value: 587
+#port = 587
+
+# SMTP authentication username.
+#
+# Can also be specified via environment variable `MAIL_SMARTHOST_USERNAME`.
+#username =
+
+# SMTP authentication password.
+#
+# Can also be specified via environment variable `MAIL_SMARTHOST_PASSWORD`.
+#password =
+
+# TLS mode. Valid values: "implicit", "starttls", "none". Setting "none"
+# alongside a password is rejected at startup to prevent transmitting
+# credentials in plaintext.
+#
+# Can also be specified via environment variable `MAIL_SMARTHOST_TLS`.
+#
+# Default value: "starttls"
+#tls = "starttls"
+
+# Max size of the connection pool.
+#
+# Can also be specified via environment variable `MAIL_SMARTHOST_POOL_SIZE`.
+#
+# Default value: 4
+#pool_size = 4
+
+# Per-command SMTP timeout in seconds. Bounds the security handshake.
+#
+# Can also be specified via environment variable `MAIL_SMARTHOST_COMMAND_TIMEOUT_SECS`.
+#
+# Default value: 30
+#command_timeout_secs = 30
+
+# Total per-message timeout in seconds. Wraps the entire send so a
+# stuck relay cannot stall the comms queue.
+#
+# Can also be specified via environment variable `MAIL_SMARTHOST_TOTAL_TIMEOUT_SECS`.
+#
+# Default value: 60
+#total_timeout_secs = 60
+
+[email.direct_mx]
+# Per-command SMTP timeout in seconds.
+#
+# Can also be specified via environment variable `MAIL_COMMAND_TIMEOUT_SECS`.
+#
+# Default value: 30
+#command_timeout_secs = 30
+
+# Total per-message timeout across all MX attempts in seconds.
+#
+# Can also be specified via environment variable `MAIL_TOTAL_TIMEOUT_SECS`.
+#
+# Default value: 60
+#total_timeout_secs = 60
+
+# Max number of concurrent direct-MX sends. Limits the load placed
+# on any single recipient MX during a backlog drain.
+#
+# Can also be specified via environment variable `MAIL_MAX_CONCURRENT_SENDS`.
+#
+# Default value: 8
+#max_concurrent_sends = 8
+
+# Require STARTTLS on every MX hop. When false, TLS is
+# attempted opportunistically and the session falls back to plaintext
+# if the remote does not advertise STARTTLS. Set true to refuse
+# plaintext delivery, at the cost of failing sends to MX hosts that
+# do not support TLS.
+#
+# Can also be specified via environment variable `MAIL_REQUIRE_TLS`.
+#
+# Default value: false
+#require_tls = false
+
+[email.dkim]
+# DKIM selector. When unset, outgoing mail is not signed.
+#
+# Can also be specified via environment variable `MAIL_DKIM_SELECTOR`.
+#selector =
+
+# DKIM signing domain.
+#
+# Can also be specified via environment variable `MAIL_DKIM_DOMAIN`.
+#domain =
+
+# Path to the DKIM private key in PEM format. Supports RSA and
+# Ed25519 keys.
+#
+# Can also be specified via environment variable `MAIL_DKIM_KEY_PATH`.
+#private_key_path =
+
+[discord]
+# Discord bot token. When unset, Discord integration is disabled.
+#
+# Can also be specified via environment variable `DISCORD_BOT_TOKEN`.
+#bot_token =
+
+[telegram]
+# Telegram bot token. When unset, Telegram integration is disabled.
+#
+# Can also be specified via environment variable `TELEGRAM_BOT_TOKEN`.
+#bot_token =
+
+# Secret token for incoming webhook verification.
+#
+# Can also be specified via environment variable `TELEGRAM_WEBHOOK_SECRET`.
+#webhook_secret =
+
+[notifications]
+# Polling interval in milliseconds for the comms queue.
+#
+# Can also be specified via environment variable `NOTIFICATION_POLL_INTERVAL_MS`.
+#
+# Default value: 1000
+#poll_interval_ms = 1000
+
+# Number of notifications to process per batch.
+#
+# Can also be specified via environment variable `NOTIFICATION_BATCH_SIZE`.
+#
+# Default value: 100
+#batch_size = 100
+
+[sso]
+[sso.github]
+# Can also be specified via environment variable `SSO_GITHUB_ENABLED`.
+# Default value: false
+#enabled = false
+
+# Can also be specified via environment variable `SSO_GITHUB_CLIENT_ID`.
+#client_id =
+
+# Can also be specified via environment variable `SSO_GITHUB_CLIENT_SECRET`.
+#client_secret =
+
+# Can also be specified via environment variable `SSO_GITHUB_DISPLAY_NAME`.
+#display_name =
+
+[sso.discord]
+# Can also be specified via environment variable `SSO_DISCORD_ENABLED`.
+# Default value: false
+#enabled = false
+
+# Can also be specified via environment variable `SSO_DISCORD_CLIENT_ID`.
+#client_id =
+
+# Can also be specified via environment variable `SSO_DISCORD_CLIENT_SECRET`.
+#client_secret =
+
+# Can also be specified via environment variable `SSO_DISCORD_DISPLAY_NAME`.
+#display_name =
+
+[sso.google]
+# Can also be specified via environment variable `SSO_GOOGLE_ENABLED`.
+# Default value: false
+#enabled = false
+
+# Can also be specified via environment variable `SSO_GOOGLE_CLIENT_ID`.
+#client_id =
+
+# Can also be specified via environment variable `SSO_GOOGLE_CLIENT_SECRET`.
+#client_secret =
+
+# Can also be specified via environment variable `SSO_GOOGLE_DISPLAY_NAME`.
+#display_name =
+
+[sso.gitlab]
+# Can also be specified via environment variable `SSO_GITLAB_ENABLED`.
+# Default value: false
+#enabled = false
+
+# Can also be specified via environment variable `SSO_GITLAB_CLIENT_ID`.
+#client_id =
+
+# Can also be specified via environment variable `SSO_GITLAB_CLIENT_SECRET`.
+#client_secret =
+
+# Can also be specified via environment variable `SSO_GITLAB_ISSUER`.
+#issuer =
+
+# Can also be specified via environment variable `SSO_GITLAB_DISPLAY_NAME`.
+#display_name =
+
+[sso.oidc]
+# Can also be specified via environment variable `SSO_OIDC_ENABLED`.
+# Default value: false
+#enabled = false
+
+# Can also be specified via environment variable `SSO_OIDC_CLIENT_ID`.
+#client_id =
+
+# Can also be specified via environment variable `SSO_OIDC_CLIENT_SECRET`.
+#client_secret =
+
+# Can also be specified via environment variable `SSO_OIDC_ISSUER`.
+#issuer =
+
+# Can also be specified via environment variable `SSO_OIDC_DISPLAY_NAME`.
+#display_name =
+
+[sso.apple]
+# Can also be specified via environment variable `SSO_APPLE_ENABLED`.
+# Default value: false
+#enabled = false
+
+# Can also be specified via environment variable `SSO_APPLE_CLIENT_ID`.
+#client_id =
+
+# Can also be specified via environment variable `SSO_APPLE_TEAM_ID`.
+#team_id =
+
+# Can also be specified via environment variable `SSO_APPLE_KEY_ID`.
+#key_id =
+
+# Can also be specified via environment variable `SSO_APPLE_PRIVATE_KEY`.
+#private_key =
+
+[moderation]
+# External report-handling service URL.
+#
+# Can also be specified via environment variable `REPORT_SERVICE_URL`.
+#report_service_url =
+
+# DID of the external report-handling service.
+#
+# Can also be specified via environment variable `REPORT_SERVICE_DID`.
+#report_service_did =
+
+[import]
+# Whether the PDS accepts repo imports.
+#
+# Can also be specified via environment variable `ACCEPTING_REPO_IMPORTS`.
+#
+# Default value: true
+#accepting = true
+
+# Maximum allowed import archive size in bytes (default 1 GiB).
+#
+# Can also be specified via environment variable `MAX_IMPORT_SIZE`.
+#
+# Default value: 1073741824
+#max_size = 1073741824
+
+# Maximum number of blocks allowed in an import.
+#
+# Can also be specified via environment variable `MAX_IMPORT_BLOCKS`.
+#
+# Default value: 500000
+#max_blocks = 500000
+
+# Skip CAR verification during import. Only for development/debugging.
+#
+# Can also be specified via environment variable `SKIP_IMPORT_VERIFICATION`.
+#
+# Default value: false
+#skip_verification = false
+
+[scheduled]
+# Interval in seconds between scheduled delete checks.
+#
+# Can also be specified via environment variable `SCHEDULED_DELETE_CHECK_INTERVAL_SECS`.
+#
+# Default value: 3600
+#delete_check_interval_secs = 3600
+
+# Interval in seconds between data file compaction scans (tranquil-store only).
+# Set to 0 to disable.
+#
+# Can also be specified via environment variable `COMPACTION_INTERVAL_SECS`.
+#
+# Default value: 3600
+#compaction_interval_secs = 3600
+
+# Liveness ratio threshold below which a data file is compacted (0.0-1.0).
+#
+# Can also be specified via environment variable `COMPACTION_LIVENESS_THRESHOLD`.
+#
+# Default value: 0.7
+#compaction_liveness_threshold = 0.7
+
+# Grace period in milliseconds before a zero-refcount block can be removed by compaction.
+#
+# Can also be specified via environment variable `COMPACTION_GRACE_PERIOD_MS`.
+#
+# Default value: 600000
+#compaction_grace_period_ms = 600000
+
+# Interval in seconds between reachability walk runs (tranquil-store only).
+# Set to 0 to disable. Default: weekly.
+#
+# Can also be specified via environment variable `REACHABILITY_WALK_INTERVAL_SECS`.
+#
+# Default value: 604800
+#reachability_walk_interval_secs = 604800
+
+# Interval in seconds between continuous archival passes (tranquil-store only).
+# Sealed eventlog segments are copied to the archival destination each tick.
+# Set to 0 to disable. Default: 60 seconds.
+#
+# Can also be specified via environment variable `ARCHIVAL_INTERVAL_SECS`.
+#
+# Default value: 60
+#archival_interval_secs = 60
+
+# Archival destination directory for sealed eventlog segments.
+# If unset, archival is disabled.
+#
+# Can also be specified via environment variable `ARCHIVAL_DEST_DIR`.
+#archival_dest_dir =
+
+# Maximum age of events retained in the eventlog before pruning.
+# Per the atproto firehose spec, the relay backfill window only needs
+# to cover "hours or days".
+#
+# Can also be specified via environment variable `EVENT_RETENTION_MAX_AGE_SECS`.
+#
+# Default value: 604800
+#event_retention_max_age_secs = 604800
+
+# Interval in seconds between event retention prune passes.
+# Set to 0 to disable.
+#
+# Can also be specified via environment variable `EVENT_RETENTION_INTERVAL_SECS`.
+#
+# Default value: 3600
+#event_retention_interval_secs = 3600

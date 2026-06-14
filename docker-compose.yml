@@ -68,25 +68,27 @@ services:
       - traefik.http.routers.vaultwarden.tls.certresolver=cloudflare
       - traefik.http.services.vaultwarden.loadbalancer.server.port=80
 
-  shrimpnet:
-    image: iceshrimp.dev/iceshrimp/iceshrimp.net:dev
-    container_name: shrimpnet
+  tranquil-pds:
+    image: atcr.io/tranquil.farm/tranquil-pds:latest
+    container_name: tranquil-pds
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     environment:
-      - ICESHRIMP_CONFIG_OVERRIDES=/app/config/configuration.ini
-    networks: [backend]
+      - JWT_SECRET=${JWT_SECRET}
+      - DPOP_SECRET=${DPOP_SECRET}
+      - MASTER_KEY=${MASTER_KEY}
     volumes:
-      - ./shrimpnet/data/media:/data/media
-      - ./shrimpnet/config:/app/config:ro
+      - ./tranquil/config.toml:/etc/tranquil-pds/config.toml:ro
+      - ./tranquil/blobs:/var/lib/tranquil/blobs
+    networks: [backend]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.shrimpnet.rule=Host(`${ICESHRIMP_SUBDOMAIN}.${PRIMARY_DOMAIN}`)
-      - traefik.http.routers.shrimpnet.entrypoints=websecure
-      - traefik.http.routers.shrimpnet.tls.certresolver=cloudflare
-      - traefik.http.services.shrimpnet.loadbalancer.server.port=3000
+      - traefik.http.routers.tranquil-pds.rule=Host(`${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}`)
+      - traefik.http.routers.tranquil-pds.entrypoints=websecure
+      - traefik.http.routers.tranquil-pds.tls.certresolver=cloudflare
+      - traefik.http.services.tranquil-pds.loadbalancer.server.port=3000
 
   db:
     image: postgres:15-alpine

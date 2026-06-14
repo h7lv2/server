@@ -3,3 +3,6 @@ db_sui/
 postgres_data/
 vw-data/
 .env
+.env.backup
+traefik/acme/acme.json
+update.sh

@@ -53,13 +53,10 @@ services:
     container_name: vaultwarden
     restart: unless-stopped
     environment:
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/vaultwarden
+      - DATABASE_URL=${VAULT_DATABASE_URL}
       - DOMAIN=https://${VAULT_SUBDOMAIN}.${PRIMARY_DOMAIN}
     volumes:
       - ./vw-data:/data
-    depends_on:
-      db:
-        condition: service_healthy
     networks: [backend]
     labels:
       - traefik.enable=true
@@ -72,13 +69,16 @@ services:
     image: atcr.io/tranquil.farm/tranquil-pds:latest
     container_name: tranquil-pds
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
+      - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}
       - DPOP_SECRET=${DPOP_SECRET}
       - MASTER_KEY=${MASTER_KEY}
+      - BLOB_STORAGE_BACKEND=${BLOB_STORAGE_BACKEND}
+      - S3_BUCKET=${S3_BUCKET}
+      - S3_ENDPOINT=${S3_ENDPOINT}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
       - ./tranquil/config.toml:/etc/tranquil-pds/config.toml:ro
       - ./tranquil/blobs:/var/lib/tranquil/blobs
@@ -89,29 +89,6 @@ services:
       - traefik.http.routers.tranquil-pds.entrypoints=websecure
       - traefik.http.routers.tranquil-pds.tls.certresolver=cloudflare
       - traefik.http.services.tranquil-pds.loadbalancer.server.port=3000
-
-  db:
-    image: postgres:15-alpine
-    container_name: shared_db
-    restart: unless-stopped
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_MULTIPLE_DATABASES=${POSTGRES_MULTIPLE_DATABASES}
-    volumes:
-      - ./postgres_data:/var/lib/postgresql/data
-      - ./postgres/init-db.sh:/usr/local/bin/init-db.sh:ro
-    command: >
-      sh -c "docker-entrypoint.sh postgres &
-             until pg_isready -U $$POSTGRES_USER; do sleep 2; done;
-             /usr/local/bin/init-db.sh;
-             wait"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks: [backend]
 
 networks:
   backend:

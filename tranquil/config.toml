@@ -68,7 +68,7 @@ age_assurance_override = true
 # Can also be specified via environment variable `DISABLE_ACCOUNT_VERIFICATION_GATE`.
 #
 # Default value: false
-#disable_account_verification_gate = false
+disable_account_verification_gate = true
 
 # List of additional banned words for handle validation.
 #

@@ -88,7 +88,7 @@ disable_account_verification_gate = true
 # Operator contact email address.
 #
 # Can also be specified via environment variable `CONTACT_EMAIL`.
-contact_email = hunhow@vivaldi.net
+contact_email = "hunhow@vivaldi.net"
 
 # Maximum allowed blob size in bytes (default 10 GiB).
 #

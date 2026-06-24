@@ -52,6 +52,8 @@ services:
     image: vaultwarden/server:latest
     container_name: vaultwarden
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - DATABASE_URL=${VAULT_DATABASE_URL}
       - DOMAIN=https://${VAULT_SUBDOMAIN}.${PRIMARY_DOMAIN}
@@ -69,6 +71,8 @@ services:
     image: atcr.io/tranquil.farm/tranquil-pds:latest
     container_name: tranquil-pds
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}

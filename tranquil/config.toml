@@ -4,7 +4,7 @@
 # Can also be specified via environment variable `PDS_HOSTNAME`.
 #
 # Required! This value must be specified.
-hostname = pds.halvacoffee.fyi
+hostname = "pds.halvacoffee.fyi"
 
 # Address to bind the HTTP server to.
 #

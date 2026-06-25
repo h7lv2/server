@@ -161,30 +161,40 @@ def reconcile() -> None:
             cf_update_txt(rec["id"], name, content)
 
     # Remove _atproto.* records that aren't desired.
-    # Two cases: (a) handle renamed, (b) account deactivated, (c) zone-wide
-    # records we don't own (parent domain's _atproto). Skip parent-level
-    # records (anything at exactly _atproto.<PARENT>) so we don't delete the
-    # apex TXT or the wildcard CNAME catch-all.
+    # Skip records we don't own:
+    #   - Zone apex: "_atproto.<zone-root>" — operator-managed, not PDS-side.
+    #     Example: "_atproto.halvacoffee.fyi" (the apex handle, used by
+    #     migrations to provision a handle that lives at the zone root).
+    #   - PDS parent: "_atproto.<parent>" — fallback did:web for the PDS host;
+    #     we leave it alone even though it's under PDS_PARENT_DOMAIN.
+    # We *do* own and delete:
+    #   - Per-handle records under PDS_PARENT_DOMAIN that don't correspond to
+    #     any active user (handle renamed, account deactivated, or stale bugged
+    #     records from v1 of this script).
     wanted_names = set(desired)
+    apex_prefix = f"_atproto.{PARENT}"  # "_atproto.pds.halvacoffee.fyi"
     for name, rec in existing.items():
         if name in wanted_names:
             continue
-        if name == f"_atproto.{PARENT}":
+        # Records that live outside PDS_PARENT_DOMAIN are not ours to manage.
+        if not name.endswith(f".{PARENT}"):
+            log.info("skipping record outside %s: %s", PARENT, name)
             continue
-        # One-time migration: v1 of this script created bugged records like
+        # The PDS parent's own _atproto record is also out of scope.
+        if name == apex_prefix:
+            continue
+        # One-time migration: v1 created bugged records like
         # `_atproto.<handle>.<PARENT>` (double-suffixed). Once the canonical
-        # record exists, delete the bugged one. Detect by the trailing
-        # `.PARENT` suffix on an _atproto record.
-        if name.endswith(f".{PARENT}") and name.startswith(f"_atproto."):
-            short = name[: -len(f".{PARENT}")]
-            if short in wanted_names:
-                log.warning(
-                    "removing bugged record %s (canonical %s exists)",
-                    name,
-                    short,
-                )
-                cf_delete_txt(rec["id"], name)
-                continue
+        # record exists, delete the bugged one.
+        short = name[: -len(f".{PARENT}")]
+        if short in wanted_names:
+            log.warning(
+                "removing bugged record %s (canonical %s exists)",
+                name,
+                short,
+            )
+            cf_delete_txt(rec["id"], name)
+            continue
         cf_delete_txt(rec["id"], name)
 
 

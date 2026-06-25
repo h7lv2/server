@@ -6,3 +6,7 @@ vw-data/
 .env.backup
 traefik/acme/acme.json
 update.sh
+
+# dns-sync: keep source tracked, ignore local build artifacts
+dns-sync/__pycache__/
+dns-sync/*.pyc

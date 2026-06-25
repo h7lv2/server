@@ -105,6 +105,22 @@ services:
       - traefik.http.routers.tranquil-pds.tls.domains[0].sans=*.${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}
       - traefik.http.services.tranquil-pds.loadbalancer.server.port=3000
 
+  dns-sync:
+    build: ./dns-sync
+    restart: unless-stopped
+    volumes:
+      - ./dns-sync/dns_sync.py:/app/dns_sync.py:ro
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - CF_API_TOKEN=${CF_DNS_API_TOKEN}
+      - CF_ZONE_ID=${CF_ZONE_ID}
+      - PDS_PARENT_DOMAIN=${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}
+    networks: [backend]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - tranquil-pds
+
 networks:
   backend:
     name: backend

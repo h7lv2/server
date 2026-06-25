@@ -98,9 +98,11 @@ services:
     networks: [backend]
     labels:
       - traefik.enable=true
-      - traefik.http.routers.tranquil-pds.rule=Host(`${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}`)
+      - traefik.http.routers.tranquil-pds.rule=Host(`${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}`) || HostRegexp(`.+\.${PDS_SUBDOMAIN}\.${PRIMARY_DOMAIN}`)
       - traefik.http.routers.tranquil-pds.entrypoints=websecure
       - traefik.http.routers.tranquil-pds.tls.certresolver=cloudflare
+      - traefik.http.routers.tranquil-pds.tls.domains[0].main=${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}
+      - traefik.http.routers.tranquil-pds.tls.domains[0].sans=*.${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}
       - traefik.http.services.tranquil-pds.loadbalancer.server.port=3000
 
 networks:

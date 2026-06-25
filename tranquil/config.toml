@@ -776,3 +776,20 @@ contact_email = "hunhow@vivaldi.net"
 #
 # Default value: 3600
 #event_retention_interval_secs = 3600
+
+# --- Email / SMTP smarthost ---
+# All of these are set via env vars (see docker-compose.yml). This block is a
+# placeholder so future `git pull`s from upstream don't conflict with our
+# overrides. The actual values come from environment variables.
+#
+# [email]
+# from_address = "noreply@halvacoffee.fyi"
+# from_name    = "Tranquil PDS"
+#
+# [email.smarthost]
+# host     = "smtp.mailgun.org"
+# port     = 587
+# username = "postmaster@mg.halvacoffee.fyi"
+# password = "<set via MAIL_SMARTHOST_PASSWORD env var>"
+# tls      = "starttls"
+

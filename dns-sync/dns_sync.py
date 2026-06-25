@@ -148,7 +148,9 @@ def reconcile() -> None:
 
     desired: dict[str, str] = {}
     for handle, did in users.items():
-        desired[f"_atproto.{handle}.{PARENT}"] = f"did={did}"
+        # Handles are FQDNs already (e.g. "maid.pds.halvacoffee.fyi"), so the
+        # _atproto subdomain is "_atproto.<handle>" with no extra suffix.
+        desired[f"_atproto.{handle}"] = f"did={did}"
 
     # Add or update desired records.
     for name, content in desired.items():
@@ -169,6 +171,20 @@ def reconcile() -> None:
             continue
         if name == f"_atproto.{PARENT}":
             continue
+        # One-time migration: v1 of this script created bugged records like
+        # `_atproto.<handle>.<PARENT>` (double-suffixed). Once the canonical
+        # record exists, delete the bugged one. Detect by the trailing
+        # `.PARENT` suffix on an _atproto record.
+        if name.endswith(f".{PARENT}") and name.startswith(f"_atproto."):
+            short = name[: -len(f".{PARENT}")]
+            if short in wanted_names:
+                log.warning(
+                    "removing bugged record %s (canonical %s exists)",
+                    name,
+                    short,
+                )
+                cf_delete_txt(rec["id"], name)
+                continue
         cf_delete_txt(rec["id"], name)
 
 

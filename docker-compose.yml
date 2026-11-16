@@ -2,7 +2,6 @@ services:
   traefik:
     image: traefik:v3.7.5
     container_name: traefik
-    entrypoint: /bin/sh -c 'sed "s|\\$${EMAIL}|${EMAIL}|g; s|\\$${CF_DNS_API_TOKEN}|${CF_DNS_API_TOKEN}|g" /traefik.yml > /etc/traefik/traefik.yml && exec traefik'
     restart: unless-stopped
     ports:
       - "80:80"
@@ -11,7 +10,7 @@ services:
       - "2097:2097"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik.yml:/traefik.yml:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/acme:/etc/traefik/acme
     environment:
       - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
@@ -119,6 +118,31 @@ services:
       - traefik.http.routers.tranquil-pds.tls.domains[0].main=${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}
       - traefik.http.routers.tranquil-pds.tls.domains[0].sans=*.${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}
       - traefik.http.services.tranquil-pds.loadbalancer.server.port=3000
+      # --- alias host: remote.<domain> 301s to the canonical PDS name ---
+      # pds.<domain> is a CNAME to remote.<domain>, but traefik had no router (and no
+      # cert) for the alias, so anything pointed at remote.<domain> got the default
+      # self-signed cert + 404 and every oauth discovery step died there.
+      - traefik.http.routers.tranquil-alias.rule=Host(`${PDS_ALIAS_SUBDOMAIN:-remote}.${PRIMARY_DOMAIN}`)
+      - traefik.http.routers.tranquil-alias.entrypoints=websecure
+      - traefik.http.routers.tranquil-alias.tls.certresolver=cloudflare
+      - traefik.http.routers.tranquil-alias.tls.domains[0].main=${PDS_ALIAS_SUBDOMAIN:-remote}.${PRIMARY_DOMAIN}
+      - traefik.http.routers.tranquil-alias.middlewares=tranquil-alias-canonical
+      - traefik.http.routers.tranquil-alias.service=noop@internal
+      - 'traefik.http.middlewares.tranquil-alias-canonical.redirectregex.regex=^(?:https?://[^/]+)?(/.*)?$'
+      - 'traefik.http.middlewares.tranquil-alias-canonical.redirectregex.replacement=https://${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}$${1}'
+      - traefik.http.middlewares.tranquil-alias-canonical.redirectregex.permanent=true
+      # --- the PDS registers https://<pds>/app/ as its own oauth redirect_uri, but the
+      # --- frontend only serves /app; /app/ answers 404 -> strip the trailing slash ---
+      - traefik.http.routers.tranquil-app.rule=Host(`${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}`) && Path(`/app/`)
+      - traefik.http.routers.tranquil-app.entrypoints=websecure
+      - traefik.http.routers.tranquil-app.priority=1000
+      - traefik.http.routers.tranquil-app.tls.certresolver=cloudflare
+      - traefik.http.routers.tranquil-app.tls.domains[0].main=${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}
+      - traefik.http.routers.tranquil-app.tls.domains[0].sans=*.${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}
+      - traefik.http.routers.tranquil-app.middlewares=tranquil-app-slash
+      - traefik.http.routers.tranquil-app.service=noop@internal
+      - 'traefik.http.middlewares.tranquil-app-slash.redirectregex.regex=^(?:https?://[^/]+)?/app/(\?.*)?$'
+      - 'traefik.http.middlewares.tranquil-app-slash.redirectregex.replacement=https://${PDS_SUBDOMAIN}.${PRIMARY_DOMAIN}/app$${1}'
 
   dns-sync:
     build: ./dns-sync

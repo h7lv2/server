@@ -13,6 +13,9 @@ entryPoints:
           permanent: true
   websecure:
     address: ":443"
+    transport:
+      respondingTimeouts:
+        readTimeout: 0
   # L4 entrypoints for TCP routing
   s-ui-api:
     address: ":2097"

@@ -26,6 +26,7 @@ services:
     ports:
       - "10000-10010:10000-10010"
       - "10000-10010:10000-10010/udp"
+      - "10070:10070"
     volumes:
       - "./db_sui:/app/db"
     networks: [backend]
@@ -34,19 +35,30 @@ services:
       - traefik.http.routers.s-ui.rule=Host(`${SUI_SUBDOMAIN}.${SUI_DOMAIN}`)
       - traefik.http.routers.s-ui.entrypoints=websecure
       - traefik.http.routers.s-ui.tls.certresolver=cloudflare
+      - traefik.http.routers.s-ui.middlewares=s-ui-hsts
       - traefik.http.routers.s-ui.service=s-ui-web
       - traefik.http.services.s-ui-web.loadbalancer.server.port=2095
-      - traefik.http.routers.s-ui-api-redirect.rule=HostRegexp(`{host:.+}`)
+      # --- plaintext :2096 -> always upgrade to TLS on :2097 (v3 rule syntax) ---
+      - traefik.http.routers.s-ui-api-redirect.rule=HostRegexp(`.+`)
       - traefik.http.routers.s-ui-api-redirect.entrypoints=s-ui-api-redirect
-      - traefik.http.routers.s-ui-api-redirect.middlewares=s-ui-redirect-to-2097
+      - traefik.http.routers.s-ui-api-redirect.middlewares=s-ui-hsts,s-ui-redirect-to-2097
       - traefik.http.routers.s-ui-api-redirect.service=noop@internal
       - traefik.http.middlewares.s-ui-redirect-to-2097.redirectscheme.scheme=https
       - traefik.http.middlewares.s-ui-redirect-to-2097.redirectscheme.port=2097
-      - traefik.tcp.routers.s-ui-api.rule=HostSNI(`*`)
-      - traefik.tcp.routers.s-ui-api.entrypoints=s-ui-api
-      - traefik.tcp.routers.s-ui-api.tls.passthrough=true
-      - traefik.tcp.routers.s-ui-api.service=s-ui-api
-      - traefik.tcp.services.s-ui-api.loadbalancer.server.port=2097
+      - traefik.http.middlewares.s-ui-redirect-to-2097.redirectscheme.permanent=true
+      # --- TLS :2097 -> s-ui subscription service (traefik terminates TLS, plain http to 2096) ---
+      - traefik.http.routers.s-ui-sub.rule=Host(`${SUI_SUBDOMAIN}.${SUI_DOMAIN}`)
+      - traefik.http.routers.s-ui-sub.entrypoints=s-ui-api
+      - traefik.http.routers.s-ui-sub.tls=true
+      - traefik.http.routers.s-ui-sub.tls.certresolver=cloudflare
+      - traefik.http.routers.s-ui-sub.middlewares=s-ui-hsts
+      - traefik.http.routers.s-ui-sub.service=s-ui-sub
+      - traefik.http.services.s-ui-sub.loadbalancer.server.port=2096
+      - traefik.http.services.s-ui-sub.loadbalancer.server.scheme=http
+      # --- HSTS ---
+      - traefik.http.middlewares.s-ui-hsts.headers.stsSeconds=31536000
+      - traefik.http.middlewares.s-ui-hsts.headers.stsIncludeSubdomains=true
+      - traefik.http.middlewares.s-ui-hsts.headers.stsPreload=true
 
   vaultwarden:
     image: vaultwarden/server:latest
@@ -74,7 +86,10 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
+      # REMOVE WHEN YOU STOP DEBUGGING
+      - RUST_LOG=debug
       - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_MAX_CONNECTIONS=25
       - JWT_SECRET=${JWT_SECRET}
       - DPOP_SECRET=${DPOP_SECRET}
       - MASTER_KEY=${MASTER_KEY}
